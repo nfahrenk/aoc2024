@@ -8,9 +8,18 @@ import (
 	"strings"
 )
 
-func helper(splits []string, ndx int) (int, error) {
-	if ndx < len(splits) {
-		return processLine(splits, ndx+1)
+func helper(splits []string, ndx int, n int) (int, error) {
+	if ndx < 0 {
+		if n > 2 {
+			ndx = n - 2
+		} else {
+			ndx = 0
+		}
+	} else {
+		ndx += 1
+	}
+	if ndx < len(splits) && ndx < n+2 {
+		return processLine(splits, ndx)
 	} else {
 		return 0, nil
 	}
@@ -48,7 +57,7 @@ func processLine(splits []string, ndx int) (int, error) {
 				diff = -diff
 			}
 			if diff <= 0 || diff > 3 {
-				return helper(splits, ndx)
+				return helper(splits, ndx, n)
 			}
 		}
 		prev = i
