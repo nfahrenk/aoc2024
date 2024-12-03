@@ -8,43 +8,60 @@ import (
 	"strings"
 )
 
-func helper(splits []string, ndx int, n int) (int, error) {
-	if ndx < 0 {
+func helper(splits []string, skipped int, n int) (int, error) {
+	if skipped < 0 {
+		// check from up to 2 elems before current index
 		if n > 2 {
-			ndx = n - 2
+			skipped = n - 2
 		} else {
-			ndx = 0
+			skipped = 0
 		}
 	} else {
-		ndx += 1
+		// increment each iteration
+		skipped += 1
 	}
-	if ndx < len(splits) && ndx < n+2 {
-		return processLine(splits, ndx)
+	// terminate when either the list ends, or the element to skip
+	// is more than one larger than the violated number
+	if skipped < len(splits) && skipped < n+2 {
+		return processLine(splits, skipped)
 	} else {
 		return 0, nil
 	}
 }
 
-func processLine(splits []string, ndx int) (int, error) {
-	prev := -1
-	var asc bool
-
+func isAscending(splits []string, skipped int) (bool, error) {
 	num1, err1 := strconv.Atoi(splits[1])
 	num2, err2 := strconv.Atoi(splits[2])
 	num0, err3 := strconv.Atoi(splits[0])
-	if err1 != nil || err2 != nil || err3 != nil {
-		fmt.Println("coult not parse int", err1, err2, err3)
+	if err1 != nil {
+		return false, err1
 	}
-	if ndx == 0 {
+	if err2 != nil {
+		return false, err2
+	}
+	if err3 != nil {
+		return false, err3
+	}
+	var asc bool
+	if skipped == 0 {
 		asc = num1 < num2
-	} else if ndx == 1 {
+	} else if skipped == 1 {
 		asc = num0 < num2
 	} else {
 		asc = num0 < num1
 	}
+	return asc, nil
+}
+
+func processLine(splits []string, skipped int) (int, error) {
+	prev := -1
+	asc, err := isAscending(splits, skipped)
+	if err != nil {
+		return 0, err
+	}
 
 	for n, elem := range splits {
-		if n == ndx {
+		if n == skipped {
 			continue
 		}
 		i, err := strconv.Atoi(elem)
@@ -57,7 +74,7 @@ func processLine(splits []string, ndx int) (int, error) {
 				diff = -diff
 			}
 			if diff <= 0 || diff > 3 {
-				return helper(splits, ndx, n)
+				return helper(splits, skipped, n)
 			}
 		}
 		prev = i
