@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -143,13 +144,49 @@ func part2(filename string) int {
 	return sum
 }
 
+func part2Revised(filename string) int {
+	rules, tests, err := readInput(filename)
+	if err != nil {
+		return -1
+	}
+	lookup := createLookup(rules)
+	sum := 0
+	for _, test := range tests {
+		ok, _ := validateTest(lookup, test)
+		hadIssue := !ok
+		if !ok {
+			sort.Slice(test, func(i, j int) bool {
+				countOrders := func(page int) int {
+					count := 0
+					// only increment if the other part of the rule
+					// is in the test
+					for before := range lookup[page] {
+						for _, elem := range test {
+							if before == elem {
+								count++
+								break
+							}
+						}
+					}
+					return count
+				}
+				return countOrders(test[i]) < countOrders(test[j])
+			})
+		}
+		if hadIssue {
+			sum += test[len(test)/2]
+		}
+	}
+	return sum
+}
+
 func main() {
-	example := part2("./input1.txt")
+	example := part2Revised("./input1.txt")
 	if example != 123 {
 		fmt.Println("assertion failed :(", example)
 		return
 	}
 	fmt.Println("assertion passed!!")
-	output := part2("input2.txt")
+	output := part2Revised("input2.txt")
 	fmt.Println("output", output)
 }
