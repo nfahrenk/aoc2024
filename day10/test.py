@@ -37,13 +37,12 @@ def score(grid, start, ignoreVisited=False):
                 path.append((r + i, c + j, level + 1))
     return count
 
-def part1(filename):
+def part1(filename, ignoreVisited=False):
     grid, points = readFile(filename)
-    return sum([score(grid, p) for p in points])
+    return sum([score(grid, p, ignoreVisited) for p in points])
 
 def part2(filename):
-    grid, points = readFile(filename)
-    return sum([score(grid, p, True) for p in points])
+    return part1(filename, True)
 
 if __name__ == "__main__":
     print("solution", part2("day10/input2.txt"))
